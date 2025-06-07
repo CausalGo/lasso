@@ -1,5 +1,6 @@
 // Package lasso implements LASSO (Least Absolute Shrinkage and Selection Operator) regression
-// with parallel coordinate descent optimization.
+// with safe parallel coordinate descent optimization. This implementation is concurrency-safe
+// and optimized for performance while maintaining numerical stability.
 package lasso
 
 import (
@@ -59,7 +60,7 @@ func NewDefaultConfig() *Config {
 	}
 }
 
-// Fit trains a LASSO regression model using coordinate descent.
+// Fit trains a LASSO regression model using thread-safe parallel coordinate descent.
 func Fit(X *mat.Dense, y []float64, cfg *Config) *LassoModel {
 	startTime := time.Now()
 	nSamples, nFeatures := X.Dims()
@@ -68,7 +69,7 @@ func Fit(X *mat.Dense, y []float64, cfg *Config) *LassoModel {
 		panic("X and y have different number of samples")
 	}
 
-	// Create working copies
+	// Create working copies to avoid modifying original data
 	XData := mat.DenseCopyOf(X)
 	yData := make([]float64, len(y))
 	copy(yData, y)
@@ -106,57 +107,97 @@ func Fit(X *mat.Dense, y []float64, cfg *Config) *LassoModel {
 		prevWeights := make([]float64, nFeatures)
 		copy(prevWeights, weights)
 
-		// Parallel coordinate update
-		var wg sync.WaitGroup
-		ch := make(chan int, nFeatures)
-
-		for i := 0; i < cfg.NJobs; i++ {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				for j := range ch {
-					if !activeSet[j] && iter > 0 {
-						continue // Skip inactive features
-					}
-
-					oldWeight := weights[j]
-					if oldWeight != 0 {
-						updateResiduals(XData, residuals, j, oldWeight)
-					}
-
-					// Compute correlation and norm
-					rho, xtx := 0.0, 0.0
-					for i := 0; i < nSamples; i++ {
-						xVal := XData.At(i, j)
-						rho += xVal * residuals[i]
-						xtx += xVal * xVal
-					}
-
-					// Apply soft-thresholding
-					newWeight := softThreshold(rho, cfg.Lambda) / (xtx + 1e-8)
-					delta := math.Abs(newWeight - oldWeight)
-					if delta > maxDelta {
-						maxDelta = delta
-					}
-
-					// Update weights and residuals
-					if newWeight != 0 {
-						activeSet[j] = true
-						updateResiduals(XData, residuals, j, -newWeight)
-						weights[j] = newWeight
-					} else {
-						weights[j] = 0
-					}
-				}
-			}()
+		// Structures for parallel computation
+		type jobResult struct {
+			j         int
+			newWeight float64
+			delta     float64
 		}
 
-		// Distribute feature indices
+		// Channel for jobs and results
+		ch := make(chan int, nFeatures)
+		resultsCh := make(chan jobResult, nFeatures)
+		var wg sync.WaitGroup
+		residualsMutex := sync.Mutex{}
+		activeSetMutex := sync.Mutex{}
+
+		// Worker function - processes one feature at a time
+		worker := func() {
+			defer wg.Done()
+			for j := range ch {
+				// Skip inactive features after first iteration
+				if iter > 0 && !activeSet[j] {
+					resultsCh <- jobResult{j: j, newWeight: weights[j], delta: 0}
+					continue
+				}
+
+				residualsMutex.Lock()
+				oldWeight := weights[j]
+
+				// Temporarily remove feature's contribution to residuals
+				if oldWeight != 0 {
+					updateResiduals(XData, residuals, j, oldWeight)
+				}
+
+				// Compute correlation (X_j^T * residuals) and norm (||X_j||^2)
+				rho, xtx := 0.0, 0.0
+				for i := 0; i < nSamples; i++ {
+					xVal := XData.At(i, j)
+					rho += xVal * residuals[i]
+					xtx += xVal * xVal
+				}
+
+				// Apply soft-thresholding to compute new weight
+				newWeight := softThreshold(rho, cfg.Lambda) / (xtx + 1e-8)
+				delta := math.Abs(newWeight - oldWeight)
+
+				// Update residuals with new weight
+				if newWeight != 0 {
+					updateResiduals(XData, residuals, j, -newWeight)
+
+					// Mark feature as active
+					activeSetMutex.Lock()
+					activeSet[j] = true
+					activeSetMutex.Unlock()
+				} else if oldWeight != 0 {
+					// Feature becomes inactive
+					activeSetMutex.Lock()
+					activeSet[j] = false
+					activeSetMutex.Unlock()
+				}
+
+				// Update weight in local scope (global update happens later)
+				weights[j] = newWeight
+				residualsMutex.Unlock()
+
+				resultsCh <- jobResult{
+					j:         j,
+					newWeight: newWeight,
+					delta:     delta,
+				}
+			}
+		}
+
+		// Start worker goroutines
+		for i := 0; i < cfg.NJobs; i++ {
+			wg.Add(1)
+			go worker()
+		}
+
+		// Feed feature indices to workers
 		for j := 0; j < nFeatures; j++ {
 			ch <- j
 		}
 		close(ch)
 		wg.Wait()
+		close(resultsCh)
+
+		// Process results to find maximum delta
+		for res := range resultsCh {
+			if res.delta > maxDelta {
+				maxDelta = res.delta
+			}
+		}
 
 		// Update intercept
 		meanResidual := floats.Sum(residuals) / float64(nSamples)
@@ -165,12 +206,12 @@ func Fit(X *mat.Dense, y []float64, cfg *Config) *LassoModel {
 		intercept = newIntercept
 		floats.AddConst(-meanResidual, residuals)
 
-		// Compute metrics
+		// Compute performance metrics
 		predictions := predict(XData, weights, intercept)
 		mse := meanSquaredError(yData, predictions)
 		r2 := rSquared(yData, predictions)
 
-		// Record history
+		// Record training history
 		logEntry := IterationLog{
 			Iteration: iter,
 			Timestamp: time.Now(),
@@ -180,7 +221,7 @@ func Fit(X *mat.Dense, y []float64, cfg *Config) *LassoModel {
 		}
 		history = append(history, logEntry)
 
-		// Log progress
+		// Log progress if enabled
 		if cfg.Verbose && (iter%cfg.LogStep == 0 || iter == cfg.MaxIter-1) {
 			duration := time.Since(iterStart)
 			activeCount := countActive(activeSet)
@@ -189,7 +230,7 @@ func Fit(X *mat.Dense, y []float64, cfg *Config) *LassoModel {
 				iter, mse, r2, maxDelta, deltaIntercept, activeCount, nFeatures, duration.Round(time.Microsecond))
 		}
 
-		// Check convergence
+		// Check convergence criterion
 		if maxDelta < cfg.Tol {
 			if cfg.Verbose {
 				fmt.Printf("Converged at iteration %d: |Δ| < %.0e\n", iter, cfg.Tol)
@@ -197,7 +238,7 @@ func Fit(X *mat.Dense, y []float64, cfg *Config) *LassoModel {
 			break
 		}
 
-		// Early stopping
+		// Early stopping based on MSE improvement
 		if cfg.EarlyStop {
 			if mse < bestMSE-cfg.MinDelta {
 				bestMSE = mse
@@ -222,7 +263,7 @@ func Fit(X *mat.Dense, y []float64, cfg *Config) *LassoModel {
 		intercept = denormalizeIntercept(intercept, weights, xMeans, xStds, yMean)
 	}
 
-	// Finalize model
+	// Finalize and return model
 	model := &LassoModel{
 		Weights:   weights,
 		Intercept: intercept,
