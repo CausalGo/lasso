@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/CausalGo/lasso"
 	"gonum.org/v1/gonum/mat"
-	"lasso"
 )
 
 func main() {
