@@ -201,7 +201,7 @@ chore: update go.mod dependencies
 
 ```bash
 # Clone repository
-git clone https://github.com/CausalGo/lasso.git
+git clone https://github.com/causalgo/lasso.git
 cd lasso
 
 # Download dependencies

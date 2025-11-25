@@ -273,7 +273,7 @@ v1.0.0 STABLE → Production release
 
 **Community**:
 - GitHub Issues - Bug reports and feature requests
-- Repository: https://github.com/CausalGo/lasso
+- Repository: https://github.com/causalgo/lasso
 
 ---
 

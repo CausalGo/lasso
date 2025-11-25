@@ -23,7 +23,7 @@ We take security seriously. If you discover a security vulnerability in LASSO Re
 Instead, please report security issues by:
 
 1. **Private Security Advisory** (preferred):
-   https://github.com/CausalGo/lasso/security/advisories/new
+   https://github.com/causalgo/lasso/security/advisories/new
 
 2. **Email** to maintainers:
    Create a private GitHub issue or contact via discussions
@@ -286,8 +286,8 @@ if predictions == nil {
 
 ## Security Contact
 
-- **GitHub Security Advisory**: https://github.com/CausalGo/lasso/security/advisories/new
-- **Public Issues** (for non-sensitive bugs): https://github.com/CausalGo/lasso/issues
+- **GitHub Security Advisory**: https://github.com/causalgo/lasso/security/advisories/new
+- **Public Issues** (for non-sensitive bugs): https://github.com/causalgo/lasso/issues
 
 ---
 

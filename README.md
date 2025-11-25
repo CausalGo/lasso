@@ -2,15 +2,15 @@
 
 > **Pure Go implementation of LASSO and Elastic Net regression** - sklearn-compatible API
 
-[![GitHub Release](https://img.shields.io/github/v/release/CausalGo/lasso?include_prereleases&style=flat-square&logo=github&color=blue)](https://github.com/CausalGo/lasso/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/causalgo/lasso?include_prereleases&style=flat-square&logo=github&color=blue)](https://github.com/causalgo/lasso/releases/latest)
 [![Go Version](https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat-square&logo=go)](https://go.dev/dl/)
-[![Go Reference](https://pkg.go.dev/badge/github.com/CausalGo/lasso.svg)](https://pkg.go.dev/github.com/CausalGo/lasso)
-[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/CausalGo/lasso/go.yml?branch=main&style=flat-square&logo=github-actions&label=CI)](https://github.com/CausalGo/lasso/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/CausalGo/lasso?style=flat-square)](https://goreportcard.com/report/github.com/CausalGo/lasso)
-[![codecov](https://img.shields.io/codecov/c/github/CausalGo/lasso?style=flat-square&logo=codecov)](https://codecov.io/gh/CausalGo/lasso)
+[![Go Reference](https://pkg.go.dev/badge/github.com/causalgo/lasso.svg)](https://pkg.go.dev/github.com/causalgo/lasso)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/causalgo/lasso/go.yml?branch=main&style=flat-square&logo=github-actions&label=CI)](https://github.com/causalgo/lasso/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/causalgo/lasso?style=flat-square)](https://goreportcard.com/report/github.com/causalgo/lasso)
+[![codecov](https://img.shields.io/codecov/c/github/causalgo/lasso?style=flat-square&logo=codecov)](https://codecov.io/gh/causalgo/lasso)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/CausalGo/lasso?style=flat-square&logo=github)](https://github.com/CausalGo/lasso/stargazers)
-[![GitHub Issues](https://img.shields.io/github/issues/CausalGo/lasso?style=flat-square&logo=github)](https://github.com/CausalGo/lasso/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/causalgo/lasso?style=flat-square&logo=github)](https://github.com/causalgo/lasso/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/causalgo/lasso?style=flat-square&logo=github)](https://github.com/causalgo/lasso/issues)
 
 ---
 
@@ -37,7 +37,7 @@ Efficient implementation of LASSO (Least Absolute Shrinkage and Selection Operat
 ## Installation 📦
 
 ```bash
-go get github.com/CausalGo/lasso
+go get github.com/causalgo/lasso
 ```
 
 ## Quick Start 🚀
@@ -48,7 +48,7 @@ package main
 import (
 	"fmt"
 	
-	"github.com/CausalGo/lasso"
+	"github.com/causalgo/lasso"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -204,7 +204,7 @@ Key optimizations:
 
 ## Documentation 📚
 
-- [API Reference](https://pkg.go.dev/github.com/CausalGo/lasso) - Full documentation on pkg.go.dev
+- [API Reference](https://pkg.go.dev/github.com/causalgo/lasso) - Full documentation on pkg.go.dev
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Development guide and Git workflow
 - [CHANGELOG.md](CHANGELOG.md) - Release history
 - [ROADMAP.md](ROADMAP.md) - Development roadmap
@@ -235,4 +235,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**[CausalGo](https://github.com/CausalGo)** - Machine learning tools for causal analysis in Go
+**[causalgo](https://github.com/causalgo)** - Machine learning tools for causal analysis in Go

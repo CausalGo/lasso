@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/CausalGo/lasso"
+	"github.com/causalgo/lasso"
 	"gonum.org/v1/gonum/mat"
 )
 

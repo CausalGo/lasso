@@ -1,4 +1,4 @@
-module github.com/CausalGo/lasso
+module github.com/causalgo/lasso
 
 go 1.25
 
