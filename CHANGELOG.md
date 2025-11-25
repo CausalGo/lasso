@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-11-25
+
+### Changed
+- Renamed organization from `CausalGo` to `causalgo` (lowercase)
+- Module path: `github.com/causalgo/lasso`
+
 ## [0.2.0] - 2025-11-25
 
 ### Added
@@ -37,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Training history tracking
 - R², MSE, MAE metrics
 
-[Unreleased]: https://github.com/causalgo/lasso/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/causalgo/lasso/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/causalgo/lasso/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/causalgo/lasso/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/causalgo/lasso/releases/tag/v0.1.0
