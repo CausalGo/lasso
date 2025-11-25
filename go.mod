@@ -1,5 +1,5 @@
 module github.com/CausalGo/lasso
 
-go 1.24
+go 1.25
 
 require gonum.org/v1/gonum v0.16.0
