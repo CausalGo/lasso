@@ -69,6 +69,7 @@ jobs:
       continue-on-error: true
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        slug: causalgo/lasso
         file: ./coverage.txt
         flags: unittests
         name: codecov-unit
